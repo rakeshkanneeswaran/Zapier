@@ -18,12 +18,14 @@ const config_1 = require("../config");
 const types_1 = require("../types");
 const config_2 = require("../config");
 const router = (0, express_1.Router)();
+// Sign In Route
 router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedBody = types_1.siginSchema.safeParse(req.body);
+    const parsedBody = types_1.signInSchema.safeParse(req.body);
     console.log(req.body);
     if (!parsedBody.success) {
         return res.status(400).json({
-            error: "Improper inputs"
+            error: "Improper inputs",
+            details: parsedBody.error.errors // Include validation errors if needed
         });
     }
     try {
@@ -36,26 +38,59 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
         console.log(user);
         if (!(user === null || user === void 0 ? void 0 : user.id)) {
             return res.status(404).json({
-                error: "User not found, please create an account"
+                error: "User not found, please create an account."
             });
         }
         else {
             if (!config_2.jwt_password) {
-                return res.json({
-                    message: "server unable to auntheticate"
+                return res.status(500).json({
+                    error: "Server unable to authenticate."
                 });
             }
-            const token = jsonwebtoken_1.default.sign({ id: user.id }, // Assuming `user.id` is the correct field
-            config_2.jwt_password // Optional: set token expiration time
+            const token = jsonwebtoken_1.default.sign({ id: user.id }, config_2.jwt_password, { expiresIn: '1h' } // Optional: set token expiration time
             );
             return res.status(200).json({
+                message: "Authentication successful.",
                 token: token
             });
         }
     }
     catch (error) {
         return res.status(500).json({
-            error: "Internal server error"
+            error: "Internal server error."
+        });
+    }
+}));
+// Sign Up Route
+router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const parsedBody = types_1.signUpSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+        return res.status(400).json({
+            error: "Improper inputs",
+            details: parsedBody.error.errors // Include validation errors if needed
+        });
+    }
+    else {
+        const userExist = yield config_1.prismaClient.user.findFirst({
+            where: {
+                username: parsedBody.data.username
+            }
+        });
+        if (userExist) {
+            return res.status(409).json({
+                error: "Username already exists. Please choose a different username."
+            });
+        }
+        const user = yield config_1.prismaClient.user.create({
+            data: {
+                firstName: parsedBody.data.firstName,
+                username: parsedBody.data.username,
+                lastName: parsedBody.data.lastName,
+                password: parsedBody.data.password
+            }
+        });
+        return res.status(201).json({
+            message: "Account successfully created."
         });
     }
 }));

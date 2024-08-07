@@ -8,11 +8,15 @@ const cors_1 = __importDefault(require("cors"));
 const PORT = 3000;
 const user_1 = __importDefault(require("./router/user"));
 const zap_1 = __importDefault(require("./router/zap"));
+const actions_1 = require("./router/actions");
+const trigger_1 = require("./router/trigger");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use("/api/v1/zap", zap_1.default);
 app.use("/api/v1/user", user_1.default);
+app.use("/api/v1/action", actions_1.actionRouter);
+app.use("/api/v1/trigger", trigger_1.triggerRouter);
 app.listen(PORT, () => {
     console.log("http://localhost:3000");
 });

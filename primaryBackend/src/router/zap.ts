@@ -1,11 +1,16 @@
-import { Router } from "express";
+import { json, Router } from "express";
 import { prismaClient } from "../config";
 import { createZapSchema } from "../types";
+import { Request } from "express";
+import authMiddleware from "../authMiddleware";
 
 prismaClient.$connect();
 const router = Router();
+interface authenticatedRequest extends Request {
+    id?: string
+}
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     // Validate input
     const parsedBody = createZapSchema.safeParse(req.body);
     console.log(parsedBody)
@@ -30,7 +35,12 @@ router.post("/", async (req, res) => {
                     data: {
                         availableActionId: action.availableActionId,
                         zapId: zap.id,
-                        metaData: action.metaData,
+                        metaData: JSON.stringify({
+                            body: action.metaData.body,
+                            subject: action.metaData.subject,
+                            adminEmail : action.metaData.adminEmail
+
+                        })
                     },
                 });
             });
@@ -62,6 +72,29 @@ router.post("/", async (req, res) => {
         });
     }
 });
+
+
+router.get("/allzaps", authMiddleware, async (req: authenticatedRequest, res) => {
+
+    const id = req.id;
+    console.log(id)
+    const zaps = await prismaClient.zap.findMany({
+        where: {
+            userId: id
+        },
+        select: {
+            actions: true,
+            triggers: true
+        }
+    })
+    return res.json({
+        zaps: zaps
+    }
+    )
+
+})
+
+
 
 const zapRouter = router;
 

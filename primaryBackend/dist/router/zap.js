@@ -8,13 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const config_1 = require("../config");
 const types_1 = require("../types");
+const authMiddleware_1 = __importDefault(require("../authMiddleware"));
 config_1.prismaClient.$connect();
 const router = (0, express_1.Router)();
-router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Validate input
     const parsedBody = types_1.createZapSchema.safeParse(req.body);
     console.log(parsedBody);
@@ -38,7 +42,11 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     data: {
                         availableActionId: action.availableActionId,
                         zapId: zap.id,
-                        metaData: action.metaData,
+                        metaData: JSON.stringify({
+                            body: action.metaData.body,
+                            subject: action.metaData.subject,
+                            adminEmail: action.metaData.adminEmail
+                        })
                     },
                 });
             }));
@@ -65,6 +73,22 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             error: "An error occurred while creating the zap and actions.",
         });
     }
+}));
+router.get("/allzaps", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.id;
+    console.log(id);
+    const zaps = yield config_1.prismaClient.zap.findMany({
+        where: {
+            userId: id
+        },
+        select: {
+            actions: true,
+            triggers: true
+        }
+    });
+    return res.json({
+        zaps: zaps
+    });
 }));
 const zapRouter = router;
 exports.default = zapRouter;
