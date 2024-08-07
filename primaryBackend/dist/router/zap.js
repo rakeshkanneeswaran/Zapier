@@ -25,7 +25,6 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
     try {
-        // Start a transaction
         const result = yield config_1.prismaClient.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             // Create Zap
             const zap = yield tx.zap.create({

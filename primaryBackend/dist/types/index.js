@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createZapSchema = void 0;
+exports.siginSchema = exports.createZapSchema = void 0;
 const zod_1 = require("zod");
 const createZapSchema = zod_1.z.object({
     userId: zod_1.z.string(),
@@ -14,3 +14,8 @@ const createZapSchema = zod_1.z.object({
     })),
 });
 exports.createZapSchema = createZapSchema;
+const siginSchema = zod_1.z.object({
+    username: zod_1.z.string(),
+    password: zod_1.z.string().max(10),
+});
+exports.siginSchema = siginSchema;

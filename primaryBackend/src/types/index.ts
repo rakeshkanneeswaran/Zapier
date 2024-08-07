@@ -1,4 +1,4 @@
-import { array, z } from 'zod'
+import { array, ParseStatus, z } from 'zod'
 
 const createZapSchema = z.object({
     userId: z.string(),
@@ -12,4 +12,9 @@ const createZapSchema = z.object({
     })),
 })
 
-export { createZapSchema }
+const siginSchema = z.object({
+    username: z.string(),
+    password: z.string().max(10),
+})
+
+export { createZapSchema, siginSchema }
