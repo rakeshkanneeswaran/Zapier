@@ -14,13 +14,13 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  username String
-  password String
+  id        String  @id @default(uuid())
+  username  String
+  password  String
   firstName String?
-  lastName String?
+  lastName  String?
 
-  zaps     Zap[]
+  zaps Zap[]
 }
 
 model Zap {
@@ -29,6 +29,7 @@ model Zap {
   user     User      @relation(fields: [userId], references: [id])
   actions  Action[]
   triggers Trigger[]
+  zapruns  zapRuns[]
 }
 
 model Trigger {
@@ -59,4 +60,17 @@ model AvailableAction {
   id      String   @id
   name    String
   actions Action[]
+}
+
+model zapRuns {
+  id           String         @id @default(uuid())
+  zapId        String
+  zap          Zap            @relation(fields: [zapId], references: [id])
+  zapRunOutbox zapRunOutBox[]
+}
+
+model zapRunOutBox {
+  id       String  @id @default(uuid())
+  zapRunId String
+  zapRun   zapRuns @relation(fields: [zapRunId], references: [id])
 }
