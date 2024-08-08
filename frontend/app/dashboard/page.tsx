@@ -5,7 +5,6 @@ import axios from 'axios';
 import Appbar from '@/components/Appbar';
 import Modal from '@/components/Modal';
 import { PRIMARY_BACKEND } from '@/public/confing';
-import { metadata } from '../layout';
 
 interface Trigger {
     id: string;
@@ -61,15 +60,15 @@ export default function Page() {
             // Sanitize actions - convert 'metaData' to a JSON string if needed by backend
             const sanitizedActions = selectedActions.map(({ name, ...rest }) => ({
                 ...rest,
-                metaData:{
+                metaData: {
                     body: rest.metaData.body,
                     subject: rest.metaData.subject,
                 },
             }));
-    
+
             // Sanitize trigger - only include fields expected by backend
             const { name, ...sanitizedTrigger } = selectedTrigger;
-    
+
             // Send the sanitized payload to the backend
             const token = localStorage.getItem('token');
             const response = await axios.post(
@@ -77,7 +76,7 @@ export default function Page() {
                 { requestedActions: sanitizedActions, requestedTrigger: sanitizedTrigger },
                 {
                     headers: {
-                        Authorization: token,
+                        Authorization: localStorage.getItem('token'),
                     },
                 }
             );
@@ -86,73 +85,87 @@ export default function Page() {
             console.error('Error:', error);
         }
     };
-    
-    
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col min-h-screen">
             <Appbar />
-            <div className="flex justify-center py-4">
-                <button onClick={handlePublish} className="p-2 border border-black">
-                    Publish
-                </button>
-            </div>
-
-            <div className="flex flex-col gap-2">
-                <ZapCell
-                    name={selectedTrigger.name}
-                    index={1}
-                    onClick={() => {
-                        setShowModal(true);
-                        setType('trigger');
-                    }}
-                />
-
-                {selectedActions.map((action, index) => (
-                    <ZapCell
-                        key={index}
-                        name={action.name || 'Action'}
-                        index={index + 2}
-                        onClick={() => {
-                            setIndex(index);
-                            setType('action');
-                            setShowModal(true);
-                        }}
-                    />
-                ))}
-
-                <div className="flex justify-center">
-                    <button onClick={handleAddAction}>+</button>
+            <main className="flex-grow p-4">
+                <div className="flex justify-center mb-4">
+                    <button
+                        onClick={handlePublish}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-300"
+                    >
+                        Publish
+                    </button>
                 </div>
 
-                <div>{JSON.stringify(selectedActions)}</div>
-                <div>{JSON.stringify(selectedTrigger)}</div>
+                <div className="flex flex-col gap-4">
+                    <ZapCell
+                        name={selectedTrigger.name}
+                        index={1}
+                        onClick={() => {
+                            setShowModal(true);
+                            setType('trigger');
+                        }}
+                    />
 
-                <Modal
-                    type={type}
-                    onClose={() => setShowModal(false)}
-                    showModal={showModal}
-                    onClickHandler={type === 'action' ? (Id: string, name: string) => {
-                        changeTheAction(index, Id, name);
-                    } : (Id: string, name: string) => {
-                        setSelectedTrigger({
-                            availableTriggerId: Id,
-                            name: name,
-                            metaData: 'this is meta data',
-                        });
-                    }}
-                />
-            </div>
+                    {selectedActions.map((action, index) => (
+                        <ZapCell
+                            key={index}
+                            name={action.name || 'Action'}
+                            index={index + 2}
+                            onClick={() => {
+                                setIndex(index);
+                                setType('action');
+                                setShowModal(true);
+                            }}
+                        />
+                    ))}
+
+                    <div className="flex justify-center">
+                        <button
+                            onClick={handleAddAction}
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition duration-300"
+                        >
+                            Add Action
+                        </button>
+                    </div>
+
+                    <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                        <h3 className="text-lg font-semibold">Selected Actions:</h3>
+                        <pre>{JSON.stringify(selectedActions, null, 2)}</pre>
+                    </div>
+                    <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                        <h3 className="text-lg font-semibold">Selected Trigger:</h3>
+                        <pre>{JSON.stringify(selectedTrigger, null, 2)}</pre>
+                    </div>
+
+                    <Modal
+                        type={type}
+                        onClose={() => setShowModal(false)}
+                        showModal={showModal}
+                        onClickHandler={type === 'action' ? (Id: string, name: string) => {
+                            changeTheAction(index, Id, name);
+                        } : (Id: string, name: string) => {
+                            setSelectedTrigger({
+                                availableTriggerId: Id,
+                                name: name,
+                                metaData: 'this is meta data',
+                            });
+                        }}
+                    />
+                </div>
+            </main>
         </div>
     );
 }
 
 function ZapCell({ name, index, onClick }: { name: string; index: number; onClick: () => void }) {
     return (
-        <button onClick={onClick} className="flex flex-row justify-center cursor-pointer">
-            <div className="flex flex-row justify-between rounded-md border border-black w-1/6 py-2 px-6">
-                <div>{index}</div>
-                <div>{name}</div>
+        <button onClick={onClick} className="flex flex-row justify-center">
+            <div className="flex flex-row items-center justify-between rounded-lg border border-gray-300 bg-white w-full max-w-xs p-4 shadow-md hover:bg-gray-100 transition duration-300">
+                <div className="text-lg font-semibold">{index}</div>
+                <div className="text-lg">{name}</div>
             </div>
         </button>
     );
