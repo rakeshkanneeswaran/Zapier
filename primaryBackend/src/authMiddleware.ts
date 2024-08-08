@@ -8,7 +8,8 @@ interface AuthenticatedRequest extends Request {
 }
 
 function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const token = req.headers.authorization; // Extract token from 'Bearer <token>'
+    const token = req.headers.authorization;
+    console.log(token) // Extract token from 'Bearer <token>'
     if (!token) {
         return res.status(401).json({
             error: "You are not authenticated"
@@ -17,7 +18,8 @@ function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunc
 
     try {
         const decoded = jwt.verify(token, jwt_password) as JwtPayload;
-        req.id = decoded.id; // Assuming the payload contains `id`
+        req.body.id = decoded.id; // Assuming the payload contains `id`
+        console.log("User authenticated:", decoded.id); // For debugging purposes, you might want to log the user's ID here
         next();
     } catch (error) {
         return res.status(403).json({

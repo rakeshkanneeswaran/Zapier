@@ -20,9 +20,11 @@ config_1.prismaClient.$connect();
 const router = (0, express_1.Router)();
 router.post("/", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Validate input
+    console.log(req.body.id);
     const parsedBody = types_1.createZapSchema.safeParse(req.body);
     console.log(parsedBody);
     if (!parsedBody.success) {
+        console.log(parsedBody.error.errors);
         return res.status(400).json({
             error: "Improper inputs",
             details: parsedBody.error.errors, // Include validation errors if needed
@@ -33,9 +35,10 @@ router.post("/", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 
             // Create Zap
             const zap = yield tx.zap.create({
                 data: {
-                    userId: parsedBody.data.userId,
+                    userId: req.body.id,
                 },
             });
+            console.log(zap);
             // Create Actions
             const actionPromises = parsedBody.data.requestedActions.map((action) => __awaiter(void 0, void 0, void 0, function* () {
                 return tx.action.create({
@@ -45,20 +48,17 @@ router.post("/", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 
                         metaData: JSON.stringify({
                             body: action.metaData.body,
                             subject: action.metaData.subject,
-                            adminEmail: action.metaData.adminEmail
                         })
                     },
                 });
             }));
-            const TriggerPromises = parsedBody.data.requestedTrigger.map((trigger) => __awaiter(void 0, void 0, void 0, function* () {
-                return tx.trigger.create({
-                    data: {
-                        availableTriggerId: trigger.availableTriggerId,
-                        zapId: zap.id,
-                        metaData: trigger.metaData,
-                    },
-                });
-            }));
+            const TriggerPromises = yield tx.trigger.create({
+                data: {
+                    availableTriggerId: parsedBody.data.requestedTrigger.availableTriggerId,
+                    zapId: zap.id,
+                    metaData: parsedBody.data.requestedTrigger.metaData,
+                },
+            });
             yield Promise.all(actionPromises);
             return {
                 zapId: zap.id,

@@ -1,19 +1,17 @@
 import { array, ParseStatus, string, z } from 'zod'
 
 const createZapSchema = z.object({
-    userId: z.string(),
     requestedActions: z.array(z.object({
         availableActionId: z.string(),
         metaData: z.object({
             subject: z.string(),
             body: z.string(),
-            adminEmail : z.string()
         })
     })),
-    requestedTrigger: z.array(z.object({
+    requestedTrigger: z.object({
         availableTriggerId: z.string(),
         metaData: z.string().optional()
-    })),
+    })
 })
 
 

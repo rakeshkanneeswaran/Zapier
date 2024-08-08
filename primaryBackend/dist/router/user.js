@@ -47,7 +47,7 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
                     error: "Server unable to authenticate."
                 });
             }
-            const token = jsonwebtoken_1.default.sign({ id: user.id }, config_2.jwt_password, { expiresIn: '1h' } // Optional: set token expiration time
+            const token = jsonwebtoken_1.default.sign({ id: user.id }, config_2.jwt_password // Optional: set token expiration time
             );
             return res.status(200).json({
                 message: "Authentication successful.",

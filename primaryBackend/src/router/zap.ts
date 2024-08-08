@@ -12,9 +12,12 @@ interface authenticatedRequest extends Request {
 
 router.post("/", authMiddleware, async (req, res) => {
     // Validate input
+    console.log(req.body.id)
+
     const parsedBody = createZapSchema.safeParse(req.body);
     console.log(parsedBody)
     if (!parsedBody.success) {
+        console.log(parsedBody.error.errors)
         return res.status(400).json({
             error: "Improper inputs",
             details: parsedBody.error.errors, // Include validation errors if needed
@@ -25,9 +28,10 @@ router.post("/", authMiddleware, async (req, res) => {
             // Create Zap
             const zap = await tx.zap.create({
                 data: {
-                    userId: parsedBody.data.userId,
+                    userId: req.body.id,
                 },
             });
+            console.log(zap)
 
             // Create Actions
             const actionPromises = parsedBody.data.requestedActions.map(async (action) => {
@@ -38,23 +42,20 @@ router.post("/", authMiddleware, async (req, res) => {
                         metaData: JSON.stringify({
                             body: action.metaData.body,
                             subject: action.metaData.subject,
-                            adminEmail : action.metaData.adminEmail
 
                         })
                     },
                 });
             });
 
-            const TriggerPromises = parsedBody.data.requestedTrigger.map(async (trigger) => {
-                return tx.trigger.create({
-                    data: {
-                        availableTriggerId: trigger.availableTriggerId,
-                        zapId: zap.id,
-                        metaData: trigger.metaData,
-                    },
-                });
+            const TriggerPromises =  await tx.trigger.create({
+                data: {
+                    availableTriggerId: parsedBody.data.requestedTrigger.availableTriggerId,
+                    zapId: zap.id,
+                    metaData: parsedBody.data.requestedTrigger.metaData,
+                },
             });
-
+                
 
 
             await Promise.all(actionPromises);
