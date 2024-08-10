@@ -9,6 +9,7 @@ app.use(cors())
 app.post("/hooks/catch/:uerId/:zapId", async (req, res) => {
 
     const userId = req.params.uerId;
+    const webhookMetaData = req.body.webhookMetaData;
     const zapId = req.params.zapId;
     console.log("New hook triggered for user :", userId, "on zap :", zapId)
 
@@ -35,13 +36,16 @@ app.post("/hooks/catch/:uerId/:zapId", async (req, res) => {
     const zapRun = await prismaClient.zapRuns.create({
         data: {
             zapId: zap.id,
+            webhookMetaData: JSON.stringify(webhookMetaData)
+
+
         }
     })
 
     const zapRunOutbox = await prismaClient.zapRunOutBox.create({
         data: {
             zapRunId: zapRun.id,
-
+            webhookMetaData: JSON.stringify(webhookMetaData)
         }
     })
 

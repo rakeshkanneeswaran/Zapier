@@ -68,10 +68,12 @@ model zapRuns {
   zapId        String
   zap          Zap            @relation(fields: [zapId], references: [id])
   zapRunOutbox zapRunOutBox[]
+  webhookMetaData String?
 }
 
 model zapRunOutBox {
   id       String  @id @default(uuid())
   zapRunId String
   zapRun   zapRuns @relation(fields: [zapRunId], references: [id])
+  webhookMetaData String?
 }
