@@ -11,7 +11,7 @@ export default function Hero() {
                 <h1 className='text-7xl text-bold font-sans shadow-primarybutton '>Automate as fast as you can type </h1>
             </div>
 
-            <p className='text-2xl px-24 py-4 pb-5 mx-auto text-center'>AI gives you automation superpowers, and Zapier puts them to work. Pairing AI and Zapier helps you turn ideas into workflows and bots that work for you.</p>
+            <p className='text-2xl px-24 py-4 pb-5 mx-auto text-center'>AI gives you automation superpowers, and AutomateX puts them to work. Pairing AI and Zapier helps you turn ideas into workflows and bots that work for you.</p>
             <PrimaryButton onClick={() => {
 
             }} size=''>Start free with email</PrimaryButton>

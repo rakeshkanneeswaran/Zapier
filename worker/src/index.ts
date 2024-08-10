@@ -1,5 +1,6 @@
 import { Kafka } from "kafkajs"
 import prismaClient from './prismaClient'
+import emailSender from "./services/emailer";
 const kafka = new Kafka({
     clientId: "worker-kafka",
     brokers: ['localhost:9092'],
@@ -21,6 +22,12 @@ async function workOnZapRunBox() {
                 value: message?.value?.toString(),
             })
 
+
+            if (message.value == null) {
+                console.log("value is null")
+                return;
+            }
+
             const parsedMessage = JSON.parse(message.value.toString())
 
             const zap = await prismaClient.zapRuns.findFirst({
@@ -36,17 +43,36 @@ async function workOnZapRunBox() {
                                     availableActionId: true,
                                     metaData: true,  // Include metaData here
                                 },
-                            },
+                            }
                         }
                     },
                 },
             })
 
-            zap?.zap.actions.forEach(element => {
+
+            zap?.zap.actions.forEach(async (element) => {
                 if (element.availableActionId == "email") {
+                    //@ts-ignore
+                    const payload = JSON.parse(element.metaData)
+                    console.log(typeof(payload.body))
                     console.log(element.metaData)
+                    if (zap.webhookMetaData == null, element.metaData == null) {
+
+                        return;
+                    }
+                    else {
+                        //@ts-ignore
+                        const webhookdata = JSON.parse(zap.webhookMetaData)
+                        const result = await emailSender({
+                            receiverEmail: JSON.stringify(webhookdata.toEmail),
+                            subject: payload.subject,
+                            text: payload.body
+                        })
+                        console.log(result)
+                    }
+
                     console.log("workdone")
-                    console.log(zap.webhookMetaData)
+
                 }
             });
         },

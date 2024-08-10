@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafkajs_1 = require("kafkajs");
 const prismaClient_1 = __importDefault(require("./prismaClient"));
+const emailer_1 = __importDefault(require("./services/emailer"));
 const kafka = new kafkajs_1.Kafka({
     clientId: "worker-kafka",
     brokers: ['localhost:9092'],
@@ -32,6 +33,10 @@ function workOnZapRunBox() {
                     offset: message.offset,
                     value: (_b = message === null || message === void 0 ? void 0 : message.value) === null || _b === void 0 ? void 0 : _b.toString(),
                 });
+                if (message.value == null) {
+                    console.log("value is null");
+                    return;
+                }
                 const parsedMessage = JSON.parse(message.value.toString());
                 const zap = yield prismaClient_1.default.zapRuns.findFirst({
                     where: {
@@ -51,13 +56,28 @@ function workOnZapRunBox() {
                         },
                     },
                 });
-                zap === null || zap === void 0 ? void 0 : zap.zap.actions.forEach(element => {
+                zap === null || zap === void 0 ? void 0 : zap.zap.actions.forEach((element) => __awaiter(this, void 0, void 0, function* () {
                     if (element.availableActionId == "email") {
+                        //@ts-ignore
+                        const payload = JSON.parse(element.metaData);
+                        console.log(typeof (payload.body));
                         console.log(element.metaData);
+                        if (zap.webhookMetaData == null, element.metaData == null) {
+                            return;
+                        }
+                        else {
+                            //@ts-ignore
+                            const webhookdata = JSON.parse(zap.webhookMetaData);
+                            const result = yield (0, emailer_1.default)({
+                                receiverEmail: JSON.stringify(webhookdata.toEmail),
+                                subject: payload.subject,
+                                text: payload.body
+                            });
+                            console.log(result);
+                        }
                         console.log("workdone");
-                        console.log(zap.webhookMetaData);
                     }
-                });
+                }));
             }),
         });
     });

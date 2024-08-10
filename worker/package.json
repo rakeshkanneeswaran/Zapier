@@ -11,7 +11,9 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^5.18.0",
-    "kafkajs": "^2.2.4"
+    "@types/nodemailer": "^6.4.15",
+    "kafkajs": "^2.2.4",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "prisma": "^5.18.0"
