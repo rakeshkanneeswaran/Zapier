@@ -16,12 +16,15 @@ interface ModalProps {
     showModal: boolean;
     onClose: () => void;
     type: 'trigger' | 'action';
-    onClickHandler: (Id: string, name: string) => void;
+    onClickHandler: (Id: string, name: string, metaData: any) => void;
 }
 
 export default function Modal({ showModal, onClose, type, onClickHandler }: ModalProps) {
     const [availableTriggers, setAvailableTriggers] = useState<Triggers[]>([]);
     const [availableActions, setAvailableActions] = useState<Actions[]>([]);
+    const [body, setBody] = useState('');
+    const [subject, setSubject] = useState('');
+    const [triggerMetaData, setTriggerMetaData] = useState("this is meta data");
 
     useEffect(() => {
         async function getAvailableActionTriggers() {
@@ -30,7 +33,7 @@ export default function Modal({ showModal, onClose, type, onClickHandler }: Moda
                     headers: { Authorization: localStorage.getItem('token') }
                 });
                 const availableActions = await axios.get(`${PRIMARY_BACKEND}/api/v1/action`, {
-                    headers: { Authorization: localStorage.getItem('token')}
+                    headers: { Authorization: localStorage.getItem('token') }
                 });
                 setAvailableTriggers(availableTriggers.data.availableTrigger);
                 setAvailableActions(availableActions.data.availableAction);
@@ -59,16 +62,38 @@ export default function Modal({ showModal, onClose, type, onClickHandler }: Moda
                     <p className="text-lg text-gray-600">Select your {type === 'action' ? 'Action' : 'Trigger'}</p>
                     <div className="flex flex-col space-y-4">
                         {(type === 'action' ? availableActions : availableTriggers).map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    onClickHandler(item.id, item.name);
-                                    onClose();
-                                }}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-300"
-                            >
-                                {item.name}
-                            </button>
+                            <div key={item.id} className="flex-col flex">
+                                <button
+                                    onClick={() => {
+                                        if (item.id === 'email') {
+                                            onClickHandler(item.id, item.name, { body, subject });
+                                        } else {
+                                            onClickHandler(item.id, item.name, triggerMetaData);
+                                        }
+                                        onClose();
+                                    }}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-300"
+                                >
+                                    {item.name}
+                                </button>
+                                {type === 'action' && item.id === 'email' && (
+                                    <>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter Subject"
+                                            value={subject}
+                                            onChange={(e) => setSubject(e.target.value)}
+                                            className="mt-2 p-2 border border-gray-300 rounded-lg"
+                                        />
+                                        <textarea
+                                            placeholder="Enter Body"
+                                            value={body}
+                                            onChange={(e) => setBody(e.target.value)}
+                                            className="mt-2 p-2 border border-gray-300 rounded-lg"
+                                        />
+                                    </>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>

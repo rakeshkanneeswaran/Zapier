@@ -5,6 +5,7 @@ import axios from 'axios';
 import Appbar from '@/components/Appbar';
 import Modal from '@/components/Modal';
 import { PRIMARY_BACKEND } from '@/public/confing';
+import ZapModal from '@/components/zapModal';
 
 interface Trigger {
     id: string;
@@ -33,6 +34,8 @@ interface RequestedActions {
 
 export default function Page() {
     const [showModal, setShowModal] = useState(false);
+    const [showZapModal, setShowZapModal] = useState(false)
+    const [zapId, setZapId] = useState("")
     const [type, setType] = useState<'trigger' | 'action'>('trigger');
     const [selectedTrigger, setSelectedTrigger] = useState<RequestedTrigger>({
         availableTriggerId: 'Trigger',
@@ -42,9 +45,9 @@ export default function Page() {
     const [selectedActions, setSelectedActions] = useState<RequestedActions[]>([]);
     const [index, setIndex] = useState(0);
 
-    function changeTheAction(index: number, availableActionId: string, name: string) {
+    function changeTheAction(index: number, availableActionId: string, name: string, metaData: any) {
         const tempArray = [...selectedActions];
-        tempArray[index] = { ...tempArray[index], availableActionId, name };
+        tempArray[index] = { ...tempArray[index], availableActionId, name, metaData };
         setSelectedActions(tempArray);
     }
 
@@ -65,7 +68,6 @@ export default function Page() {
                     subject: rest.metaData.subject,
                 },
             }));
-
             // Sanitize trigger - only include fields expected by backend
             const { name, ...sanitizedTrigger } = selectedTrigger;
 
@@ -80,12 +82,18 @@ export default function Page() {
                     },
                 }
             );
+            if (!response.data.zapId) {
+                alert("somthing went woring")
+            }
+            else {
+                setZapId(`${response.data.userId}/${response.data.zapId}`);
+                setShowZapModal(true);
+            }
             console.log('Response:', response.data);
         } catch (error) {
             console.error('Error:', error);
         }
     };
-
     return (
         <div className="flex flex-col min-h-screen">
             <Appbar />
@@ -100,27 +108,42 @@ export default function Page() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    <ZapCell
-                        name={selectedTrigger.name}
-                        index={1}
-                        onClick={() => {
-                            setShowModal(true);
-                            setType('trigger');
-                        }}
-                    />
 
-                    {selectedActions.map((action, index) => (
+                    <div className='flex flex-col w-full'>
                         <ZapCell
-                            key={index}
-                            name={action.name || 'Action'}
-                            index={index + 2}
+                            name={selectedTrigger.name}
+                            index={1}
                             onClick={() => {
-                                setIndex(index);
-                                setType('action');
                                 setShowModal(true);
+                                setType('trigger');
                             }}
                         />
+                        <div className='flex justify-center w-full'>
+                            <svg className='w-8 h-8' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                                <path d="M26.29 20.29 18 28.59V0h-2v28.59l-8.29-8.3-1.42 1.42 10 10a1 1 0 0 0 1.41 0l10-10z" data-name="2-Arrow Down" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {selectedActions.map((action, index) => (
+                        <div key={index} className='flex flex-col w-full'>
+                            <ZapCell
+                                name={action.name || 'Action'}
+                                index={index + 2}
+                                onClick={() => {
+                                    setIndex(index);
+                                    setType('action');
+                                    setShowModal(true);
+                                }}
+                            />
+                            <div className='flex justify-center w-full'>
+                                <svg className='w-8 h-8' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                                    <path d="M26.29 20.29 18 28.59V0h-2v28.59l-8.29-8.3-1.42 1.42 10 10a1 1 0 0 0 1.41 0l10-10z" data-name="2-Arrow Down" />
+                                </svg>
+                            </div>
+                        </div>
                     ))}
+
 
                     <div className="flex justify-center">
                         <button
@@ -140,12 +163,16 @@ export default function Page() {
                         <pre>{JSON.stringify(selectedTrigger, null, 2)}</pre>
                     </div>
 
+                    <div>
+                        <ZapModal showModal={showZapModal} zapId={zapId} onClose={() => { setShowZapModal(false) }}></ZapModal>
+                    </div>
+
                     <Modal
                         type={type}
                         onClose={() => setShowModal(false)}
                         showModal={showModal}
-                        onClickHandler={type === 'action' ? (Id: string, name: string) => {
-                            changeTheAction(index, Id, name);
+                        onClickHandler={type === 'action' ? (Id: string, name: string, metaData: any) => {
+                            changeTheAction(index, Id, name, metaData);
                         } : (Id: string, name: string) => {
                             setSelectedTrigger({
                                 availableTriggerId: Id,
