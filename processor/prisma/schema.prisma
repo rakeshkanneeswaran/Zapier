@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  username  String
+  password  String
+  firstName String?
+  lastName  String?
+  
+
+  zaps Zap[]
+}
+
+model Zap {
+  id       String    @id @default(uuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id])
+  actions  Action[]
+  triggers Trigger[]
+  zapruns  zapRuns[]
+}
+
+model Trigger {
+  id                 String           @id @default(uuid())
+  AvailableTrigger   AvailableTrigger @relation(fields: [availableTriggerId], references: [id])
+  availableTriggerId String
+  zapId              String
+  zap                Zap              @relation(fields: [zapId], references: [id])
+  metaData           String?
+}
+
+model Action {
+  id                String          @id @default(uuid())
+  availableActionId String
+  availableAction   AvailableAction @relation(fields: [availableActionId], references: [id])
+  zapId             String
+  zap               Zap             @relation(fields: [zapId], references: [id])
+  metaData          String?
+}
+
+model AvailableTrigger {
+  id       String    @id
+  name     String
+  triggers Trigger[]
+}
+
+model AvailableAction {
+  id      String   @id
+  name    String
+  actions Action[]
+}
+
+model zapRuns {
+  id           String         @id @default(uuid())
+  zapId        String
+  zap          Zap            @relation(fields: [zapId], references: [id])
+  zapRunOutbox zapRunOutBox[]
+}
+
+model zapRunOutBox {
+  id       String  @id @default(uuid())
+  zapRunId String
+  zapRun   zapRuns @relation(fields: [zapRunId], references: [id])
+}
