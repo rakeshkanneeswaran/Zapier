@@ -60,12 +60,16 @@ router.post("/", authMiddleware, async (req, res) => {
 
             await Promise.all(actionPromises);
             return {
-                zapId: zap.id,
+                zapId: zap.id
             };
         });
 
         // Respond with the result
-        res.status(201).json({ "zapId": result.zapId });
+        res.status(201).json({
+             zapId: result.zapId ,
+             userId : req.body.id
+            
+        });
     } catch (error) {
         console.error("Error creating zap:", error);
         res.status(500).json({
