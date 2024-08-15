@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Appbar from '@/components/Appbar';
 import Modal from '@/components/Modal';
-const primaryBackendUrl = process.env.PRIMARY_BACKEND;
+const primaryBackendUrl = process.env.NEXT_PUBLIC_PRIMARY_BACKEND;
 import ZapModal from '@/components/zapModal';
 
 interface Trigger {
