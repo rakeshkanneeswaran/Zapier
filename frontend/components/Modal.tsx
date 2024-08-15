@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { PRIMARY_BACKEND } from "@/public/confing";
+const primaryBackendUrl = process.env.NEXT_PUBLIC_PRIMARY_BACKEND;
 
 interface Triggers {
     id: string;
@@ -29,10 +29,10 @@ export default function Modal({ showModal, onClose, type, onClickHandler }: Moda
     useEffect(() => {
         async function getAvailableActionTriggers() {
             try {
-                const availableTriggers = await axios.get(`${PRIMARY_BACKEND}/api/v1/trigger`, {
+                const availableTriggers = await axios.get(`${primaryBackendUrl}/api/v1/trigger`, {
                     headers: { Authorization: localStorage.getItem('token') }
                 });
-                const availableActions = await axios.get(`${PRIMARY_BACKEND}/api/v1/action`, {
+                const availableActions = await axios.get(`${primaryBackendUrl}/api/v1/action`, {
                     headers: { Authorization: localStorage.getItem('token') }
                 });
                 setAvailableTriggers(availableTriggers.data.availableTrigger);

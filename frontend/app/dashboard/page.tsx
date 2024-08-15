@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Appbar from '@/components/Appbar';
 import Modal from '@/components/Modal';
-import { PRIMARY_BACKEND } from '@/public/confing';
+const primaryBackendUrl = process.env.PRIMARY_BACKEND;
 import ZapModal from '@/components/zapModal';
 
 interface Trigger {
@@ -74,7 +74,7 @@ export default function Page() {
             // Send the sanitized payload to the backend
             const token = localStorage.getItem('token');
             const response = await axios.post(
-                `${PRIMARY_BACKEND}/api/v1/zap`,
+                `${primaryBackendUrl}/api/v1/zap`,
                 { requestedActions: sanitizedActions, requestedTrigger: sanitizedTrigger },
                 {
                     headers: {

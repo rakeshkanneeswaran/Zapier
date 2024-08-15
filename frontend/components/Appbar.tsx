@@ -1,7 +1,5 @@
 "use client";
 import React from 'react';
-import axios from 'axios';
-import { PRIMARY_BACKEND } from '@/public/confing';
 import { useRouter } from 'next/navigation';
 import { LinkButton } from './buttons/LinkButton';// Assuming LinkButton is a separate component
 import PrimaryButton from './buttons/PrimaryButton';

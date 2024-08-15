@@ -1,6 +1,5 @@
 import React from 'react';
-
-export default function Logincard() {
+export default function Signupcard() {
     return (
         <div className='flex flex-col justify-center max-w-md mx-auto p-4 border'>
             <div className='flex flex-col py-4'>
@@ -25,9 +24,8 @@ export default function Logincard() {
             </div>
 
             <div className='text-sm text-center'>
-                By signing up, you agree to Zapier's terms of service and privacy policy.
+                By signing up, you agree to Zapier&apos;s terms of service and privacy policy.
             </div>
         </div>
     );
 }
-
