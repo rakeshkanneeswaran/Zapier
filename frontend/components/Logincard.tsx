@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 const primaryBackendUrl = process.env.NEXT_PUBLIC_PRIMARY_BACKEND;
+
 import { useRouter } from 'next/navigation';
 export default function Logincard() {
     const router = useRouter();
@@ -35,6 +36,8 @@ export default function Logincard() {
                 className='bg-primarybutton text-white py-2 rounded-xl text-center font-bold my-4 hover:bg-orange-800 transition duration-300'
                 onClick={async () => {
                     try {
+                        console.log('Backend URL:', primaryBackendUrl);
+
                         const res = await axios.post(`${primaryBackendUrl}/api/v1/user/signin`, {
                             username: email,
                             password
