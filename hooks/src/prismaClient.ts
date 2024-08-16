@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-const prismaClient = new PrismaClient();
+const prismaClient = new PrismaClient({
+    log: ['query']
+});
+
 
 // Connect to your database (replace with your own connection string)
 prismaClient.$connect()

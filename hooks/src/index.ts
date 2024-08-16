@@ -6,18 +6,23 @@ const app = express();
 app.use(express.json());
 app.use(cors())
 
-app.post("/hooks/catch/:uerId/:zapId", async (req, res) => {
+app.post("/hooks/catch/:userId/:zapId", async (req, res) => {
 
-    const userId = req.params.uerId;
+    const userId = req.params.userId;
+    console.log(process.env.DATABASE_URL)
     const webhookMetaData = req.body.webhookMetaData;
     const zapId = req.params.zapId;
     console.log("New hook triggered for user :", userId, "on zap :", zapId)
+    console.log({
+        userId: userId,
+        zapId: zapId,
+    })
 
     // Get the zap details with triggers and actions
     const zap = await prismaClient.zap.findFirst({
         where: {
             id: zapId,
-            userId: userId
+            userId : userId
         },
         include: {
             triggers: true,
@@ -25,13 +30,14 @@ app.post("/hooks/catch/:uerId/:zapId", async (req, res) => {
         }
     })
 
+    console.log(zap)
+
     // If the zap does not exist, return a 404 status code and error message.
     if (!zap?.id) {
-        return res.sendStatus(404).json({
+        return res.status(404).json({
             "error": "unable to find the zap"
-        })
+        });
     }
-
 
     const zapRun = await prismaClient.zapRuns.create({
         data: {

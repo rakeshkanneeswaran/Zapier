@@ -15,16 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const kafkajs_1 = require("kafkajs");
 const prismaClient_1 = __importDefault(require("./prismaClient"));
 const emailer_1 = __importDefault(require("./services/emailer"));
+const broker = process.env.kafka_broker || 'localhost:9092';
+const topic = process.env.kafka_topic || 'zap-events';
 const kafka = new kafkajs_1.Kafka({
-    clientId: "worker-kafka",
-    brokers: ['localhost:9092'],
+    clientId: "processKafka",
+    brokers: [broker],
 });
 function workOnZapRunBox() {
     return __awaiter(this, void 0, void 0, function* () {
         const consumer = kafka.consumer({ groupId: "zapier-consumers" });
         yield consumer.connect();
         yield consumer.subscribe({
-            topic: "zap-events", fromBeginning: true
+            topic: topic, fromBeginning: true
         });
         consumer.run({
             eachMessage: (_a) => __awaiter(this, [_a], void 0, function* ({ topic, partition, message }) {

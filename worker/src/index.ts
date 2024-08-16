@@ -1,18 +1,20 @@
 import { Kafka } from "kafkajs"
 import prismaClient from './prismaClient'
 import emailSender from "./services/emailer";
-const kafka = new Kafka({
-    clientId: "worker-kafka",
-    brokers: ['localhost:9092'],
-})
+const broker = process.env.kafka_broker || 'localhost:9092'
+const topic = process.env.kafka_topic || 'zap-events'
 
+const kafka = new Kafka({
+    clientId: "processKafka",
+    brokers: [broker],
+})
 
 async function workOnZapRunBox() {
 
     const consumer = kafka.consumer({ groupId: "zapier-consumers" });
     await consumer.connect();
     await consumer.subscribe({
-        topic: "zap-events", fromBeginning: true
+        topic: topic, fromBeginning: true
     })
 
     consumer.run({

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx tsc -b && node dist/index.js"
+    "start": "npx tsc -b && node dist/index.js",
+    "seed": "npx tsc -b && node dist/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,4 @@
     "prisma": "^5.17.0",
     "zod": "^3.23.8"
   }
-
-  
 }

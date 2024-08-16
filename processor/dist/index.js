@@ -14,18 +14,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prismaClient_1 = __importDefault(require("./prismaClient"));
 const kafkajs_1 = require("kafkajs");
+const broker = process.env.kafka_broker || 'localhost:9092';
+const topic = process.env.kafka_topic || 'zap-events';
 const kafka = new kafkajs_1.Kafka({
     clientId: "processKafka",
-    brokers: ['localhost:9092'],
+    brokers: [broker],
 });
 function processZapRunOutBox() {
     return __awaiter(this, void 0, void 0, function* () {
         const producer = kafka.producer();
+        const admin = kafka.admin();
+        admin.connect();
         producer.connect();
+        const topics = yield admin.listTopics();
+        console.log("Topics:", topics);
+        if (!topics.includes(topic)) {
+            admin.createTopics({
+                topics: [{
+                        topic: topic,
+                        numPartitions: 1, // Number of partitions
+                        replicationFactor: 1, // Replication factor
+                    }]
+            });
+        }
         while (true) {
             const zapRun = yield prismaClient_1.default.zapRunOutBox.findMany({});
             producer.send({
-                topic: "zap-events",
+                topic: topic,
                 messages: zapRun.map((runs) => {
                     return {
                         value: JSON.stringify({
