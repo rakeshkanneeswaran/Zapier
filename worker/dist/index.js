@@ -70,12 +70,14 @@ function workOnZapRunBox() {
                         else {
                             //@ts-ignore
                             const webhookdata = JSON.parse(zap.webhookMetaData);
-                            const result = yield (0, emailer_1.default)({
-                                receiverEmail: JSON.stringify(webhookdata.toEmail),
-                                subject: payload.subject,
-                                text: payload.body
-                            });
-                            console.log(result);
+                            for (let index = 0; index < webhookdata.toEmail.length; index++) {
+                                const result = yield (0, emailer_1.default)({
+                                    receiverEmail: JSON.stringify(webhookdata.toEmail[index]),
+                                    subject: payload.subject,
+                                    text: payload.body
+                                });
+                                console.log(result);
+                            }
                         }
                         console.log("workdone");
                     }

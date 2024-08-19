@@ -56,7 +56,7 @@ async function workOnZapRunBox() {
                 if (element.availableActionId == "email") {
                     //@ts-ignore
                     const payload = JSON.parse(element.metaData)
-                    console.log(typeof(payload.body))
+                    console.log(typeof (payload.body))
                     console.log(element.metaData)
                     if (zap.webhookMetaData == null, element.metaData == null) {
 
@@ -65,16 +65,18 @@ async function workOnZapRunBox() {
                     else {
                         //@ts-ignore
                         const webhookdata = JSON.parse(zap.webhookMetaData)
-                        const result = await emailSender({
-                            receiverEmail: JSON.stringify(webhookdata.toEmail),
-                            subject: payload.subject,
-                            text: payload.body
-                        })
-                        console.log(result)
+                        for (let index = 0; index < webhookdata.toEmail.length; index++) {
+
+                            const result = await emailSender({
+                                receiverEmail: JSON.stringify(webhookdata.toEmail[index]),
+                                subject: payload.subject,
+                                text: payload.body
+                            })
+                            console.log(result)
+                        }
+
                     }
-
                     console.log("workdone")
-
                 }
             });
         },

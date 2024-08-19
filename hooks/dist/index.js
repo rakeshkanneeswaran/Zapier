@@ -21,13 +21,18 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.post("/hooks/catch/:userId/:zapId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.userId;
+    console.log(process.env.DATABASE_URL);
     const webhookMetaData = req.body.webhookMetaData;
     const zapId = req.params.zapId;
     console.log("New hook triggered for user :", userId, "on zap :", zapId);
+    console.log({
+        userId: userId,
+        zapId: zapId,
+    });
     // Get the zap details with triggers and actions
     const zap = yield prismaClient_1.default.zap.findFirst({
         where: {
-            id: "1d470708-85c4-4602-85e5-73fcb6e8c3ba",
+            id: zapId,
             userId: userId
         },
         include: {

@@ -20,47 +20,76 @@ const kafka = new kafkajs_1.Kafka({
     clientId: "processKafka",
     brokers: [broker],
 });
-function processZapRunOutBox() {
+function createTopicIfNotExists() {
     return __awaiter(this, void 0, void 0, function* () {
-        const producer = kafka.producer();
         const admin = kafka.admin();
-        admin.connect();
-        producer.connect();
-        const topics = yield admin.listTopics();
-        console.log("Topics:", topics);
-        if (!topics.includes(topic)) {
-            admin.createTopics({
-                topics: [{
-                        topic: topic,
-                        numPartitions: 1, // Number of partitions
-                        replicationFactor: 1, // Replication factor
-                    }]
-            });
+        try {
+            yield admin.connect();
+            const topics = yield admin.listTopics();
+            console.log("Topics:", topics);
+            if (!topics.includes(topic)) {
+                console.log(`Creating topic ${topic}`);
+                yield admin.createTopics({
+                    topics: [{
+                            topic: topic,
+                            numPartitions: 1, // Number of partitions
+                            replicationFactor: 1, // Replication factor
+                        }]
+                });
+                console.log(`Topic ${topic} created`);
+            }
+            else {
+                console.log(`Topic ${topic} already exists`);
+            }
         }
-        while (true) {
-            const zapRun = yield prismaClient_1.default.zapRunOutBox.findMany({});
-            producer.send({
-                topic: topic,
-                messages: zapRun.map((runs) => {
-                    return {
-                        value: JSON.stringify({
-                            zapId: runs.zapRunId
-                        })
-                    };
-                })
-            });
-            console.log(zapRun);
-            yield prismaClient_1.default.zapRunOutBox.deleteMany({
-                where: {
-                    id: {
-                        in: zapRun.map((zaprun) => {
-                            return zaprun.id;
-                        })
-                    }
-                }
-            });
-            yield new Promise(r => setTimeout(r, 3000));
+        catch (error) {
+            console.error(`Error creating topic ${topic}:`, error);
+        }
+        finally {
+            yield admin.disconnect();
         }
     });
 }
-processZapRunOutBox();
+function processZapRunOutBox() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const producer = kafka.producer();
+        try {
+            yield createTopicIfNotExists();
+            yield producer.connect();
+            while (true) {
+                const zapRun = yield prismaClient_1.default.zapRunOutBox.findMany({});
+                console.log("ZapRun items:", zapRun);
+                if (zapRun.length > 0) {
+                    yield producer.send({
+                        topic: topic,
+                        messages: zapRun.map((runs) => ({
+                            value: JSON.stringify({
+                                zapId: runs.zapRunId
+                            })
+                        }))
+                    });
+                    console.log(`Sent ${zapRun.length} messages to topic ${topic}`);
+                    yield prismaClient_1.default.zapRunOutBox.deleteMany({
+                        where: {
+                            id: {
+                                in: zapRun.map(zaprun => zaprun.id)
+                            }
+                        }
+                    });
+                    console.log("Deleted processed zapRun items");
+                }
+                else {
+                    console.log("No zapRun items found");
+                }
+                yield new Promise(r => setTimeout(r, 3000)); // Sleep for 3 seconds
+            }
+        }
+        catch (error) {
+            console.error("Error processing zapRun:", error);
+        }
+        finally {
+            yield producer.disconnect();
+        }
+    });
+}
+processZapRunOutBox().catch(console.error);
