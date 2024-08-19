@@ -1,11 +1,12 @@
 
-# AutomateX
+# Zapier
 
-AutomateX is a microservices-based automation platform replicating Zapier's core functionalities. It enables users to create automated workflows (Zaps) triggered by webhooks, performing actions like sending emails. The system features a scalable microservices architecture and an event-driven design.
+Zapier is a microservices-based automation platform replicating Zapier's core functionalities. It enables users to create automated workflows (Zaps) triggered by webhooks, performing actions like sending emails. The system features a scalable microservices architecture and an event-driven design.
 
 ## System Design Architecture
 
-![Untitled-2024-07-26-0244](https://github.com/user-attachments/assets/e09fcc53-897c-42b8-8fcd-0de3d5755d5f)
+![Untitled-2024-07-26-0244](https://github.com/user-attachments/assets/14ac90db-f4ed-41e1-a05d-486943d724f9)
+
 
 
 ## Tech Stack
@@ -37,20 +38,20 @@ Ensure you have Docker installed on your machine. You can download Docker from [
 2. **Start PostgreSQL:**
 
    ```bash
-   docker run -p 5432:5432 --name automatex_postgres -e POSTGRES_USER=automatex -e POSTGRES_PASSWORD=automatex -e POSTGRES_DB=automatex_db postgres:13
+   docker run -p 5432:5432 --name zapier_postgres -e POSTGRES_USER=automatex -e POSTGRES_PASSWORD=automatex -e POSTGRES_DB=automatex_db postgres:13
    ```
 
 3. **Start Apache Kafka:**
 
    ```bash
-   docker run --name automatex_kafka -p -d 9092:9092 apache/kafka:3.7.1
+   docker run --name zapier_kafka -p -d 9092:9092 apache/kafka:3.7.1
    ```
 
 4. **Get shell access to the Kafka container:**
 
    ```bash
    docker ps
-   docker exec -it automatex_kafka /bin/bash
+   docker exec -it zapier_kafka /bin/bash
    ```
 
 5. **Create a Kafka topic:**
